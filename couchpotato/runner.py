@@ -86,7 +86,8 @@ def runCouchPotato(options, base_path, args, data_dir = None, log_dir = None, En
     src_files = [options.config_file, db_path, db_path + '-shm', db_path + '-wal']
     for src_file in src_files:
         if os.path.isfile(src_file):
-            shutil.copy2(src_file, os.path.join(new_backup, os.path.basename(src_file)))
+            #shutil.copy2(src_file, os.path.join(new_backup, os.path.basename(src_file)))
+            shutil.copyfile(src_file, os.path.join(new_backup, os.path.basename(src_file)))
 
     # Remove older backups, keep backups 3 days or at least 3
     backups = []
@@ -106,7 +107,10 @@ def runCouchPotato(options, base_path, args, data_dir = None, log_dir = None, En
                 os.rmdir(backup)
                 total_backups -= 1
 
-
+    
+    print 'Enabling console logging'
+    options.console_log = True
+    
     # Register environment settings
     Env.set('encoding', encoding)
     Env.set('app_dir', base_path)

@@ -82,7 +82,7 @@ class Plugin(object):
             f = open(path, 'w+' if not binary else 'w+b')
             f.write(content)
             f.close()
-            os.chmod(path, Env.getPermission('file'))
+            #os.chmod(path, Env.getPermission('file'))
         except Exception, e:
             log.error('Unable writing to file "%s": %s', (path, e))
 

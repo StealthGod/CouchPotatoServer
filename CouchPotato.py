@@ -10,6 +10,7 @@ import subprocess
 import sys
 import traceback
 import time
+import android
 
 # Root path
 base_path = dirname(os.path.abspath(__file__))
@@ -20,19 +21,26 @@ sys.path.insert(0, os.path.join(base_path, 'libs'))
 from couchpotato.environment import Env
 from couchpotato.core.helpers.variable import getDataDir
 
+droid = android.Android()
+
 class Loader(object):
 
     do_restart = False
 
     def __init__(self):
-
+        print 'Initializing CouchPotatoServer'
+        
         # Get options via arg
         from couchpotato.runner import getOptions
         self.options = getOptions(base_path, sys.argv[1:])
-
+        
         # Load settings
         settings = Env.get('settings')
+        self.options.config_file = '/mnt/sdcard/cps/settings.conf'
         settings.setFile(self.options.config_file)
+        
+        self.options.data_dir = '/mnt/sdcard/cps'
+        self.options.pid_file = '/mnt/sdcard/cps/cps.pid'
 
         # Create data dir if needed
         if self.options.data_dir:
@@ -74,10 +82,23 @@ class Loader(object):
     def onExit(self, signal, frame):
         from couchpotato.core.event import fireEvent
         fireEvent('app.shutdown', single = True)
+        print 'Releasing wakelocks'
+        droid.wakeLockRelease()
+        droid.wifiLockRelease()
 
     def run(self):
 
         self.addSignals()
+        
+        print 'data_dir: ' + self.options.data_dir
+        print 'pid_file: ' + self.options.pid_file
+        print 'config_file: ' + self.options.config_file
+
+        print 'Acquiring partial wakelock (cpu only)'
+        droid.wakeLockAcquirePartial()
+
+        print 'Acquiring full wifi wakelock'
+        droid.wifiLockAcquireFull()
 
         from couchpotato.runner import runCouchPotato
         runCouchPotato(self.options, base_path, sys.argv[1:], data_dir = self.data_dir, log_dir = self.log_dir, Env = Env)

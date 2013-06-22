@@ -47,7 +47,8 @@ class MetaDataBase(Plugin):
                     if content:
                         log.debug('Creating %s file: %s', (file_type, name))
                         if os.path.isfile(content):
-                            shutil.copy2(content, name)
+                            #shutil.copy2(content, name)
+                            shutil.copyfile(content, name)
                         else:
                             self.createFile(name, content)
                             group['renamed_files'].append(name)
